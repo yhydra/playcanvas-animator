@@ -1,6 +1,11 @@
 /*jshint esversion: 6*/
 var AnimatorControl = pc.createScript('animatorControl');
+
 AnimatorControl.attributes.add('skinnedMesh', {type: 'entity', default: 0, title: 'Skinned Mesh'});
+
+AnimatorControl.attributes.add('spineBone', {type: 'string', default: 'SpineBone', title: 'Spine Bone'});
+AnimatorControl.attributes.add('hipBone', {type: 'string', default: 'HipsBone', title: 'Hip Bone'});
+
 var lowerLayerMask= [
     'Foot_Left_jnt',
     'Foot_Right_jnt',
@@ -29,9 +34,39 @@ var upperLayerMask = [
     'Chest_jnt'
 ];
 
+var tempUpperBone;
+var tempLowerBone;
+
+var bones = { };
+var skins = skinMesh.model.model.skinInstances;
+
+for(var s = 0; s < skins.length; s++) {
+    for(var b = 0; b < skins[s].bones.length; b++) {
+        bones[skins[s].bones[b].name] = skins[s].bones[b];
+        
+        if(skins[s].bones[b].name == this.spineBone) {
+            tempUpperBone = skins[s].bones[b];
+            upperLayerMask = [];
+            
+            for(var t = 0; t < tempUpperBone.length; t++) {
+                upperLayerMask.append(tempUpperBone[t]);
+            }
+        }
+        
+        if(skins[s].bones[b].name == this.hipBone) {
+            tempLowerBone = skins[s].bones[b];
+            lowerLayerMask = [];
+            
+            for(var t = 0; t < tempLowerBone.length; t++) {
+                lowerLayerMask.append(tempLowerBone[t]);
+            }
+        }
+    }
+}
+
 //skeleton ID for input to update anim trigger or not
-var upperLayerRootBone = 'Spine_jnt';
-var lowerLayerRootBone = 'Hips_jnt';
+var upperLayerRootBone = this.spineBone;
+var lowerLayerRootBone = this.hipBone;
 
 // initialize code called once per entity
 AnimatorControl.prototype.initialize = function() {
