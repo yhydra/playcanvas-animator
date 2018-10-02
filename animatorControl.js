@@ -1,8 +1,6 @@
 /*jshint esversion: 6*/
 var AnimatorControl = pc.createScript('animatorControl');
 AnimatorControl.attributes.add('skinnedMesh', {type: 'entity', default: 0, title: 'Skinned Mesh'});
-AnimatorControl.attributes.add('networkManager', {type: 'entity', default: 0, title: 'Network Manager'});
-AnimatorControl.attributes.add('localPlayer', {type: 'boolean', default: false, title: 'Local Player'});
 var lowerLayerMask= [
     'Foot_Left_jnt',
     'Foot_Right_jnt',
@@ -34,12 +32,10 @@ var upperLayerMask = [
 //skeleton ID for input to update anim trigger or not
 var upperLayerRootBone = 'Spine_jnt';
 var lowerLayerRootBone = 'Hips_jnt';
-var socket;
+
 // initialize code called once per entity
 AnimatorControl.prototype.initialize = function() {
-    if(this.networkManager) {
-        socket = this.networkManager.script.netPlayerManager.socket;   
-    }
+
     this.layers=[];
     this.frames=[];
     let idle = { 'id':'idle', anim:this.skinnedMesh.animation.data.animations.swordIdle };
@@ -117,14 +113,11 @@ AnimatorControl.prototype.CreateAvatarAnim =function(rootBone, targetBones, anim
     thisSkeleton.updateAnim = false;
     thisSkeleton.targetBones = targetBones;
     thisSkeleton.id = animObject.id;
-    if(this.localPlayer) {
         this.app.on(animObject.id,()=>{
             if(Math.abs(thisSkeleton.currentTime, thisSkeleton.animation.duration)<0.01) {
                 thisSkeleton.updateAnim=!thisSkeleton.updateAnim;
-                socket.emit('triggerAnim', thisSkeleton.id);
             }
         });
-    }
     return thisSkeleton;
 };
 
