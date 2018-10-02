@@ -6,7 +6,7 @@ This is a useful animator script that can be used similar fashion to the AvatarM
 
 You can use this script by solely altering attributes and then simply hooking in to the PlayCanvas event system to interact with your new SkeletonBlend.
 
-[Insert Screenshot of Attributes]
+![Attributes](https://i.imgur.com/RgXYRJh.png)
 
 Just alter these attributes based on your model. You can do that by sending this event (which will log your bone structure):
 
