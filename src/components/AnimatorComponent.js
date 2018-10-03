@@ -98,7 +98,7 @@ AnimatorControl.prototype.initialize = function() {
     for(key in animations) {
         window[key] = this.CreateLayerAnim(upperLayerMask, "" + key, key); // Here we are saying (if key is for instance, monkey, window.monkey = {id: 'monkey', anim: animations.monkey }
         
-        this.layers.push(this.CreateAvatarAnim(upperLayerRootBone, upperLayerMask, window[key]); // Here we'll define the animation
+        this.layers.push(this.CreateAvatarAnim(upperLayerRootBone, upperLayerMask, window[key])); // Here we'll define the animation
     }
     
     //this.layers.push(this.CreateAvatarAnim(upperLayerRootBone, upperLayerMask, slash));
