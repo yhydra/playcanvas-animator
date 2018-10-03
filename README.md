@@ -71,6 +71,6 @@ AnimationBlending.prototype.keyUp = function (e) {
     }
 };
 ```
-## Road Map
-Sequencing similar to mecanim
+## Table of Contents
+[Roadmap](https://github.com/yhydra/playcanvas-animator/dev/production/roadmap.md)
 
