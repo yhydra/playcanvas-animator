@@ -72,5 +72,5 @@ AnimationBlending.prototype.keyUp = function (e) {
 };
 ```
 ## Table of Contents
-[Roadmap](https://github.com/yhydra/playcanvas-animator/dev/production/ROADMAP.md)
+[Roadmap](https://github.com/yhydra/playcanvas-animator/dev/production/roadmap.md)
 
