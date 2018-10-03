@@ -221,7 +221,7 @@ AnimatorControl.protototype.onSkeletonList = function() {
             console.log(skins[s].bones[b]);
         }
     }
-}
+};
 
 
 
