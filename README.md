@@ -65,3 +65,6 @@ AnimationBlending.prototype.keyUp = function (e) {
     }
 };
 ```
+## Road Map
+Sequencing similar to mecanim
+
