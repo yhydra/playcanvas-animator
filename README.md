@@ -11,8 +11,12 @@ You can use this script by solely altering attributes and then simply hooking in
 Just alter these attributes based on your model. You can do that by sending this event (which will log your bone structure):
 
 ```
-this.app.fire('bones:list');
+this.app.fire('bone:list');
 ```
+
+And this will respond with something that looks similar to this (if you have a humanoid character:
+
+[Insert Example Screenshot of Bone Listing]
 
 Note that this will only work if the script is correctly attached to a MeshComponent and has the SkinnedMesh attribute ascribed.
 
