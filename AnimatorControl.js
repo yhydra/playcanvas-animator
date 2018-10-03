@@ -7,6 +7,8 @@ AnimatorControl.attributes.add('animationEntity', {type: 'entity', default: 0, t
 AnimatorControl.attributes.add('spineBone', {type: 'string', default: 'SpineBone', title: 'Spine Bone'});
 AnimatorControl.attributes.add('hipBone', {type: 'string', default: 'HipsBone', title: 'Hip Bone'});
 
+AnimatorControl.attributes.add('debug', {type: 'boolean', default: false, title: 'Debug Mode?'});
+
 var lowerLayerMask= [
     'Foot_Left_jnt',
     'Foot_Right_jnt',
@@ -78,8 +80,8 @@ AnimatorControl.prototype.initialize = function() {
     }
     
     // This is where we'll store all of the current animation's data
-    this.layers=[];
-    this.frames=[];
+    this.layers = [];
+    this.frames = [];
     
     // Hardcode defined animations, if necessary, but it's preferable to just let the component define it.
     
@@ -124,9 +126,10 @@ AnimatorControl.prototype.CreateSkeleton = function(rootBone, skinMesh, targetBo
     
     for(let index in targetBones) {
         let boneNode = targetBones[index];
+        
         for(let xindex in bones) {
             let bone = bones[xindex];
-            if(bone.name==boneNode) {
+            if(bone.name == boneNode) {
                 thisGraph.push(bone);
             }
         }
@@ -141,7 +144,7 @@ AnimatorControl.prototype.CreateSkeleton = function(rootBone, skinMesh, targetBo
     return rootBoneSkeleton;
 };
 
-AnimatorControl.prototype.CreateAvatarAnim =function(rootBone, targetBones, animObject){
+AnimatorControl.prototype.CreateAvatarAnim = function(rootBone, targetBones, animObject){ 
     //create a new skeleton and set it to the skinned mesh entity
     
     //set its graph to the nodes from the spine and further down
@@ -155,19 +158,19 @@ AnimatorControl.prototype.CreateAvatarAnim =function(rootBone, targetBones, anim
     
     // //Filter the animation nodes into a new array to be added into the new animation clip array
     var relevantFilteredNodes = layerSkeletonNodes.filter(function(node) {
-    for(var index in targetBones) {
-        let skelNode = targetBones[index];
-        if(node._name==skelNode) {
-            return node;
+        for(var index in targetBones) {
+            let skelNode = targetBones[index];
+            if(node._name == skelNode) {
+                return node;
+            }
         }
-    }
     });
     
-    // //Loop through our filtered nodes and add the filtered animation nodes into the new animation clip
+    // Loop through our filtered nodes and add the filtered animation nodes into the new animation clip
     for(let index in relevantFilteredNodes) {
         let node = relevantFilteredNodes[index];
         
-        if(index!="binaryIndexOf"){
+        if(index != "binaryIndexOf"){
             this.layerSkeletonAnimClip.addNode(node);
         }
     }
@@ -185,9 +188,9 @@ AnimatorControl.prototype.CreateAvatarAnim =function(rootBone, targetBones, anim
     thisSkeleton.targetBones = targetBones;
     thisSkeleton.id = animObject.id;
     
-        this.app.on(animObject.id,() => {
-            if(Math.abs(thisSkeleton.currentTime, thisSkeleton.animation.duration)<0.01) {
-                thisSkeleton.updateAnim=!thisSkeleton.updateAnim;
+        this.app.on('animator:' + animObject.id,() => {
+            if(Math.abs(thisSkeleton.currentTime, thisSkeleton.animation.duration) < 0.01) {
+                thisSkeleton.updateAnim =! thisSkeleton.updateAnim;
             }
         });
     
@@ -196,8 +199,10 @@ AnimatorControl.prototype.CreateAvatarAnim =function(rootBone, targetBones, anim
 
 AnimatorControl.prototype.TriggerAnim = function(id) {
     this.layers.find((layer) => {
-       if(layer.id==id) {
-           layer.updateAnim=!layer.updateAnim;
+       if(layer.id == id) {
+           layer.updateAnim =! layer.updateAnim;
+           
+           if(this.debug) console.log('Animator [DEBUG]: Layer Updated', layer.updateAnim);
        } 
     });
 };
@@ -222,17 +227,17 @@ AnimatorControl.protototype.onSkeletonList = function() {
 
 // UPDATE code called every frame //
 AnimatorControl.prototype.postUpdate = function(dt) {
-        
     for(let index in this.layers) {
         let skeletonLayer = this.layers[index];
         
-        // console.log(skeletonLayer);
+        if(this.debug) console.log('Animator [DEBUG]: ', skeletonLayer);
+        
         if(skeletonLayer.updateAnim)  {
             skeletonLayer.addTime(dt*2);
             skeletonLayer.updateGraph();
             
-            if(Math.abs(skeletonLayer.currentTime, skeletonLayer.animation.duration)<0.01) {
-                skeletonLayer.updateAnim=false;
+            if(Math.abs(skeletonLayer.currentTime, skeletonLayer.animation.duration) < 0.01) {
+                skeletonLayer.updateAnim = false;
             }
         }
     }
