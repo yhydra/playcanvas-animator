@@ -10,69 +10,83 @@ AnimatorControl.attributes.add('hipBone', {type: 'string', default: 'HipsBone', 
 AnimatorControl.attributes.add('debug', {type: 'boolean', default: false, title: 'Debug Mode?'});
 
 var lowerLayerMask= [
-    'Foot_Left_jnt',
-    'Foot_Right_jnt',
-    'Hips_jnt',
-    'LowerLeg_Left_jnt',
-    'LowerLeg_Right_jnt',
-    'Toe_Left_jnt',
-    'Toe_Right_jnt',
-    'UpperLeg_Left_jnt',
-    'UpperLeg_Right_jnt'
+    'LeftFoot',
+    'RightFoot',
+    'Hips',
+    'LeftLeg',
+    'RightLeg',
+    'LeftToeBase',
+    'RightToeBase',
+    'LeftUpLeg',
+    'RightUpLeg'
 ];
 
 var upperLayerMask = [
-    'Neck_jnt',
-    'Shoulder_Left_jnt', 
-    'Shoulder_Right_jnt', 
-    'Spine_jnt',
-    'Spine_jnt1', 
-    'Forearm_Left_jnt', 
-    'Forearm_Right_jnt',
-    'Hand_Left_jnt',
-    'Hand_Right_jnt',
-    'Head_jnt',
-    'Arm_Left_jnt',
-    'Arm_Right_jnt',
-    'Chest_jnt'
+    'Neck',
+    'LeftShoulder', 
+    'RightShoulder', 
+    'Spine',
+    'Spine1', 
+    'LeftForearm', 
+    'RightForearm',
+    'LeftHand',
+    'RightHand',
+    'Head',
+    'LeftArm',
+    'RightArm',
+    'Spine2' // Chest
 ];
 
 var tempUpperBone;
 var tempLowerBone;
 
+// We'll loop through these to get the bones we'll filter.
 var bones = { };
-var skins = skinMesh.model.model.skinInstances;
+var skins;
 
-for(var s = 0; s < skins.length; s++) {
-    for(var b = 0; b < skins[s].bones.length; b++) {
-        bones[skins[s].bones[b].name] = skins[s].bones[b];
-        
-        if(skins[s].bones[b].name == this.spineBone) {
-            tempUpperBone = skins[s].bones[b];
-            upperLayerMask = [];
-            
-            for(var t = 0; t < tempUpperBone.length; t++) {
-                upperLayerMask.append(tempUpperBone[t]);
-            }
-        }
-        
-        if(skins[s].bones[b].name == this.hipBone) {
-            tempLowerBone = skins[s].bones[b];
-            lowerLayerMask = [];
-            
-            for(var t = 0; t < tempLowerBone.length; t++) {
-                lowerLayerMask.append(tempLowerBone[t]);
-            }
-        }
-    }
-}
-
-//skeleton ID for input to update anim trigger or not
-var upperLayerRootBone = this.spineBone;
-var lowerLayerRootBone = this.hipBone;
+// Skeleton ID for input to update anim trigger or not
+var upperLayerRootBone = 'Spine'; // this.spineBone;
+var lowerLayerRootBone = 'Hips'; // this.hipBone;
 
 // initialize code called once per entity
 AnimatorControl.prototype.initialize = function() {
+    
+    // INITIALIZE SKIN/BONES
+    skins = this.skinnedMesh.model.model.skinInstances;
+    
+    for(var s = 0; s < skins.length; s++) {
+        for(var b = 0; b < skins[s].bones.length; b++) {
+            bones[skins[s].bones[b].name] = skins[s].bones[b];
+
+            // This is some other code designed to loop through the spine and hip bones so you don't have to custom set the bones, but it's inoperational atm
+    //         if(skins[s].bones[b].name == this.spineBone) {
+    //             tempUpperBone = skins[s].bones[b];
+    //             upperLayerMask = [];
+
+    //             for(var t = 0; t < tempUpperBone.length; t++) {
+    //                 upperLayerMask.append(tempUpperBone[t]);
+    //             }
+    //         }
+
+    //         if(skins[s].bones[b].name == this.hipBone) {
+    //             tempLowerBone = skins[s].bones[b];
+    //             lowerLayerMask = [];
+
+    //             for(var t = 0; t < tempLowerBone.length; t++) {
+    //                 lowerLayerMask.append(tempLowerBone[t]);
+    //             }
+    //         }
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // Make sure we actually have an entity with our animation component
     if(!this.animationEntity) {
         console.log("Animator: You must define an entity where an animation component with animations is defined!");
@@ -81,7 +95,9 @@ AnimatorControl.prototype.initialize = function() {
     
     // This is where we'll store all of the current animation's data
     this.layers = [];
-    this.frames = [];
+    this.frames = []; // Not used atm, but will be used for blending, I expect.
+    
+    //var reload = { id: 'reload', anim: this.skinnedMesh.animation.data.animations.IdleReloading };
     
     // Hardcode defined animations, if necessary, but it's preferable to just let the component define it.
     
@@ -91,32 +107,36 @@ AnimatorControl.prototype.initialize = function() {
     let slash = { 'id':'slash', anim:this.skinnedMesh.animation.data.animations.swordSlash };
     */
     
-    let animations = this.animationEntity.animation.data.animations;
+    this.animations = this.entity.animation.data.animations;
+    var reloadAnim = this.entity.animation.getAnimation('IdleReloading');
+    window.reload = this.CreateLayerAnim(upperLayerMask, 'reload', reloadAnim);
     
     // Unfortunately we have to define all of these globally, 
     // which is inefficient and really unnecessary, but there's no other way to implement it
-    for(var key in animations) {
-        window[key] = this.CreateLayerAnim(upperLayerMask, "" + key, key); // Here we are saying (if key is for instance, monkey, window.monkey = {id: 'monkey', anim: animations.monkey }
+//     for(var key in animations) {
+//         window[key] = this.CreateLayerAnim(upperLayerMask, "" + key, key); // Here we are saying (if key is for instance, monkey, window.monkey = {id: 'monkey', anim: animations.monkey }
         
-        this.layers.push(this.CreateAvatarAnim(upperLayerRootBone, upperLayerMask, window[key])); // Here we'll define the animation
-    }
+//         this.layers.push(this.CreateAvatarAnim(upperLayerRootBone, upperLayerMask, window[key])); // Here we'll define the animation
+//     }
     
     //this.layers.push(this.CreateAvatarAnim(upperLayerRootBone, upperLayerMask, slash));
     //this.layers.push(this.CreateAvatarAnim(lowerLayerRootBone, lowerLayerMask, run));
+    this.layers.push(this.CreateAvatarAnim(upperLayerRootBone, upperLayerMask, window.reload));
+    
 };
 
 AnimatorControl.prototype.CreateLayerAnim = (layer, id, anim) => {
-    return  { layer:layer, id:id, anim: this.animationEntity.animation.data.animations[anim] };
+    return  { 'layer': layer, 'id': id, 'anim': anim };
 };
 
-AnimatorControl.prototype.CreateSkeleton = function(rootBone, skinMesh, targetBones) {
-    let boneGraph = skinMesh.model.model.getGraph();
+AnimatorControl.prototype.CreateSkeleton = function(rootBone, skinnedMesh, targetBones) {
+    let boneGraph = skinnedMesh.model.model.getGraph();
     let rootBoneNodes = boneGraph.findByName(rootBone);
     
     var bones = { };
     var thisGraph = [];
     
-    var skins = skinMesh.model.model.skinInstances;
+    var skins = skinnedMesh.model.model.skinInstances;
     
     for(var s = 0; s < skins.length; s++) {
         for(var b = 0; b < skins[s].bones.length; b++) {
@@ -144,7 +164,7 @@ AnimatorControl.prototype.CreateSkeleton = function(rootBone, skinMesh, targetBo
     return rootBoneSkeleton;
 };
 
-AnimatorControl.prototype.CreateAvatarAnim = function(rootBone, targetBones, animObject){ 
+AnimatorControl.prototype.CreateAvatarAnim = function(rootBone, targetBones, animObject, animation){ 
     //create a new skeleton and set it to the skinned mesh entity
     
     //set its graph to the nodes from the spine and further down
@@ -154,7 +174,7 @@ AnimatorControl.prototype.CreateAvatarAnim = function(rootBone, targetBones, ani
     this.layerSkeletonAnimClip = new pc.Animation();
     
     //grab the nodes from the animation
-    const layerSkeletonNodes = animObject.anim._nodes;
+    const layerSkeletonNodes = animObject.anim.nodes; //animObject.anim._nodes;
     
     // //Filter the animation nodes into a new array to be added into the new animation clip array
     var relevantFilteredNodes = layerSkeletonNodes.filter(function(node) {
@@ -188,9 +208,10 @@ AnimatorControl.prototype.CreateAvatarAnim = function(rootBone, targetBones, ani
     thisSkeleton.targetBones = targetBones;
     thisSkeleton.id = animObject.id;
     
-        this.app.on('animator:' + animObject.id,() => {
+        this.app.on('animator' + ':' + this.animationEntity.name + ':' + animObject.id,() => {
             if(Math.abs(thisSkeleton.currentTime, thisSkeleton.animation.duration) < 0.01) {
                 thisSkeleton.updateAnim =! thisSkeleton.updateAnim;
+                
             }
         });
     
@@ -208,7 +229,7 @@ AnimatorControl.prototype.TriggerAnim = function(id) {
 };
 
 // EVENT CODE //
-AnimatorControl.protototype.onSkeletonList = function() {
+AnimatorControl.prototype.onSkeletonList = function() {
     console.log("Animator: Bone List");
     console.log("-------------------");
     
@@ -233,13 +254,13 @@ AnimatorControl.prototype.postUpdate = function(dt) {
         if(this.debug) console.log('Animator [DEBUG]: ', skeletonLayer);
         
         if(skeletonLayer.updateAnim)  {
-            skeletonLayer.addTime(dt*2);
+            skeletonLayer.addTime(dt * 2);
             skeletonLayer.updateGraph();
             
             if(Math.abs(skeletonLayer.currentTime, skeletonLayer.animation.duration) < 0.01) {
                 skeletonLayer.updateAnim = false;
+                this.app.fire('animator:' + this.animationEntity.name + ':end:' + skeletonLayer.id);
             }
         }
     }
 };
-
